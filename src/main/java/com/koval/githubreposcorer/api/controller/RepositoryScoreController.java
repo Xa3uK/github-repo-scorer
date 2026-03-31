@@ -36,6 +36,6 @@ public class RepositoryScoreController {
         @PastOrPresent
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAfter
     ) {
-        return popularRepositoryService.getPopularRepos(language, createdAfter);
+        return popularRepositoryService.getPopularRepos(language, createdAfter).items();
     }
 }

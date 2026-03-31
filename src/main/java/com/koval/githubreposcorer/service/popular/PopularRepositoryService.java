@@ -1,10 +1,12 @@
 package com.koval.githubreposcorer.service.popular;
 
+import com.koval.githubreposcorer.api.dto.PopularRepositoriesResponse;
 import com.koval.githubreposcorer.api.dto.PopularRepositoryResponse;
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.result.ScoredRepository;
 import com.koval.githubreposcorer.service.GithubSearchService;
 import com.koval.githubreposcorer.service.scoring.RepositoryScoringService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,7 +26,8 @@ public class PopularRepositoryService {
         this.scoringService = scoringService;
     }
 
-    public List<PopularRepositoryResponse> getPopularRepos(String programingLanguage, LocalDate createdFrom) {
+    @Cacheable(value = "popularRepositories", key = "#programingLanguage + ':' + #createdFrom")
+    public PopularRepositoriesResponse getPopularRepos(String programingLanguage, LocalDate createdFrom) {
         List<RepositoryItemResponse> mostStarred = githubSearchService.fetchTopStarred(programingLanguage, createdFrom);
         List<RepositoryItemResponse> mostForked  = githubSearchService.fetchTopForked(programingLanguage, createdFrom);
 
@@ -32,10 +35,12 @@ public class PopularRepositoryService {
         mostStarred.forEach(r -> merged.put(r.id(), r));
         mostForked.forEach(r -> merged.putIfAbsent(r.id(), r));
 
-        return scoringService.score(List.copyOf(merged.values()))
+        List<PopularRepositoryResponse> items = scoringService.score(List.copyOf(merged.values()))
                 .stream()
                 .map(this::toResponse)
                 .toList();
+
+        return new PopularRepositoriesResponse(items);
     }
 
     private PopularRepositoryResponse toResponse(ScoredRepository scored) {

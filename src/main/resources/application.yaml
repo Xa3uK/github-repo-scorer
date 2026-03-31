@@ -1,6 +1,12 @@
 spring:
   application:
     name: github-repo-scorer
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
 
 github:
   api:
