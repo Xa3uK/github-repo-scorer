@@ -1,4 +1,4 @@
-package com.koval.githubreposcorer.util.date;
+package com.koval.githubreposcorer.util;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

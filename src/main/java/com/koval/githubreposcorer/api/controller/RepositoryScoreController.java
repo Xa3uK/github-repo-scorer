@@ -1,7 +1,7 @@
 package com.koval.githubreposcorer.api.controller;
 
-import com.koval.githubreposcorer.api.dto.PopularRepositoryResponse;
-import com.koval.githubreposcorer.service.popular.PopularRepositoryService;
+import com.koval.githubreposcorer.api.response.PopularRepositoryResponse;
+import com.koval.githubreposcorer.service.PopularRepositoryService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;

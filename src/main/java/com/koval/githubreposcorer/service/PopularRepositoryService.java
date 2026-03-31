@@ -1,11 +1,9 @@
-package com.koval.githubreposcorer.service.popular;
+package com.koval.githubreposcorer.service;
 
-import com.koval.githubreposcorer.api.dto.PopularRepositoriesResponse;
-import com.koval.githubreposcorer.api.dto.PopularRepositoryResponse;
+import com.koval.githubreposcorer.api.response.PopularRepositoriesResponse;
+import com.koval.githubreposcorer.api.response.PopularRepositoryResponse;
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.result.ScoredRepository;
-import com.koval.githubreposcorer.service.GithubSearchService;
-import com.koval.githubreposcorer.service.scoring.RepositoryScoringService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 

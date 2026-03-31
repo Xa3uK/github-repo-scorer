@@ -1,4 +1,4 @@
-package com.koval.githubreposcorer.util.percentile;
+package com.koval.githubreposcorer.util;
 
 import java.util.ArrayList;
 import java.util.Collections;

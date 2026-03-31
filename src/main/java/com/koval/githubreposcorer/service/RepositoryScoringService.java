@@ -1,9 +1,9 @@
-package com.koval.githubreposcorer.service.scoring;
+package com.koval.githubreposcorer.service;
 
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.result.ScoredRepository;
-import com.koval.githubreposcorer.util.date.RecencyUtils;
-import com.koval.githubreposcorer.util.percentile.PercentileUtils;
+import com.koval.githubreposcorer.util.RecencyUtils;
+import com.koval.githubreposcorer.util.PercentileUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;

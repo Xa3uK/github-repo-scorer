@@ -1,4 +1,4 @@
-package com.koval.githubreposcorer.api.dto;
+package com.koval.githubreposcorer.api.response;
 
 import java.time.Instant;
 

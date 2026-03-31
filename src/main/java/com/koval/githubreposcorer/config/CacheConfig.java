@@ -1,6 +1,6 @@
-package com.koval.githubreposcorer.config.cache;
+package com.koval.githubreposcorer.config;
 
-import com.koval.githubreposcorer.api.dto.PopularRepositoriesResponse;
+import com.koval.githubreposcorer.api.response.PopularRepositoriesResponse;
 import java.time.Duration;
 
 import org.springframework.boot.cache.autoconfigure.RedisCacheManagerBuilderCustomizer;
