@@ -1,3 +1,7 @@
 spring:
   application:
     name: github-repo-scorer
+
+github:
+  api:
+    token: ${GITHUB_API_TOKEN:}
