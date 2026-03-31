@@ -2,7 +2,9 @@ package com.koval.githubreposcorer.service.popular;
 
 import com.koval.githubreposcorer.api.dto.PopularRepositoryResponse;
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
+import com.koval.githubreposcorer.model.result.ScoredRepository;
 import com.koval.githubreposcorer.service.GithubSearchService;
+import com.koval.githubreposcorer.service.scoring.RepositoryScoringService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -14,25 +16,30 @@ import java.util.Map;
 public class PopularRepositoryService {
 
     private final GithubSearchService githubSearchService;
+    private final RepositoryScoringService scoringService;
 
-    public PopularRepositoryService(GithubSearchService githubSearchService) {
+    public PopularRepositoryService(GithubSearchService githubSearchService,
+                                    RepositoryScoringService scoringService) {
         this.githubSearchService = githubSearchService;
+        this.scoringService = scoringService;
     }
 
-    public List<PopularRepositoryResponse> getCandidates(String language, LocalDate createdAfter) {
-        List<RepositoryItemResponse> starred = githubSearchService.fetchTopStarred(language, createdAfter);
-        List<RepositoryItemResponse> forked = githubSearchService.fetchTopForked(language, createdAfter);
+    public List<PopularRepositoryResponse> getPopularRepos(String programingLanguage, LocalDate createdFrom) {
+        List<RepositoryItemResponse> mostStarred = githubSearchService.fetchTopStarred(programingLanguage, createdFrom);
+        List<RepositoryItemResponse> mostForked  = githubSearchService.fetchTopForked(programingLanguage, createdFrom);
 
         Map<Long, RepositoryItemResponse> merged = new LinkedHashMap<>();
-        starred.forEach(r -> merged.put(r.id(), r));
-        forked.forEach(r -> merged.putIfAbsent(r.id(), r));
+        mostStarred.forEach(r -> merged.put(r.id(), r));
+        mostForked.forEach(r -> merged.putIfAbsent(r.id(), r));
 
-        return merged.values().stream()
+        return scoringService.score(List.copyOf(merged.values()))
+                .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    private PopularRepositoryResponse toResponse(RepositoryItemResponse repo) {
+    private PopularRepositoryResponse toResponse(ScoredRepository scored) {
+        RepositoryItemResponse repo = scored.repo();
         return new PopularRepositoryResponse(
                 repo.id(),
                 repo.fullName(),
@@ -42,7 +49,7 @@ public class PopularRepositoryService {
                 repo.forksCount(),
                 repo.createdAt(),
                 repo.pushedAt(),
-                0.0
+                Math.round(scored.score() * 10000.0) / 10000.0
         );
     }
 }

@@ -17,16 +17,16 @@ public class GithubSearchService {
         this.githubClient = githubClient;
     }
 
-    public List<RepositoryItemResponse> fetchTopStarred(String language, LocalDate createdAfter) {
-        return fetch(language, createdAfter, "stars");
+    public List<RepositoryItemResponse> fetchTopStarred(String language, LocalDate createdFrom) {
+        return fetch(language, createdFrom, "stars");
     }
 
-    public List<RepositoryItemResponse> fetchTopForked(String language, LocalDate createdAfter) {
-        return fetch(language, createdAfter, "forks");
+    public List<RepositoryItemResponse> fetchTopForked(String language, LocalDate createdFrom) {
+        return fetch(language, createdFrom, "forks");
     }
 
-    private List<RepositoryItemResponse> fetch(String language, LocalDate createdAfter, String sort) {
-        String query = "language:" + language + " created:>=" + createdAfter;
+    private List<RepositoryItemResponse> fetch(String language, LocalDate createdFrom, String sort) {
+        String query = "language:" + language + " created:>=" + createdFrom;
         TopRepositoriesResponse response = githubClient.searchRepositories(query, sort);
 
         if (response == null || response.items() == null) {
