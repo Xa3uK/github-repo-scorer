@@ -19,13 +19,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(pd);
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ProblemDetail> handleResponseStatus(ResponseStatusException e) {
-        ProblemDetail pd = ProblemDetail.forStatus(e.getStatusCode());
-        pd.setDetail(e.getReason());
-        return ResponseEntity.status(e.getStatusCode()).body(pd);
-    }
-
     @ExceptionHandler(RestClientResponseException.class)
     public ResponseEntity<ProblemDetail> handleGithubError(RestClientResponseException e) {
         if (e.getStatusCode().value() == 429) {
