@@ -24,10 +24,10 @@ public class PopularRepositoryService {
         this.scoringService = scoringService;
     }
 
-    @Cacheable(value = "popularRepositories", key = "#programingLanguage + ':' + #createdFrom")
-    public PopularRepositoriesResponse getPopularRepos(String programingLanguage, LocalDate createdFrom) {
-        List<RepositoryItemResponse> mostStarred = githubSearchService.fetchTopStarred(programingLanguage, createdFrom);
-        List<RepositoryItemResponse> mostForked  = githubSearchService.fetchTopForked(programingLanguage, createdFrom);
+    @Cacheable(value = "popularRepositories", key = "#language + ':' + #createdAfter")
+    public PopularRepositoriesResponse getPopularRepos(String language, LocalDate createdAfter) {
+        List<RepositoryItemResponse> mostStarred = githubSearchService.fetchTopStarred(language, createdAfter);
+        List<RepositoryItemResponse> mostForked  = githubSearchService.fetchTopForked(language, createdAfter);
 
         Map<Long, RepositoryItemResponse> merged = new LinkedHashMap<>();
         mostStarred.forEach(r -> merged.put(r.id(), r));
