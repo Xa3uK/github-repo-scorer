@@ -1,6 +1,6 @@
 # GitHub Repo Scorer
 
-Spring Boot REST API that returns the most popular GitHub repositories for a given programming language and creation date.
+Spring Boot REST API that returns top 100 most popular GitHub repositories for a given programming language and creation date.
 
 ## Tech Stack
 
