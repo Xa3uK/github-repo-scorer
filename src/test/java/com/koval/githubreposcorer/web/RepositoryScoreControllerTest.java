@@ -1,5 +1,6 @@
-package com.koval.githubreposcorer.api.controller;
+package com.koval.githubreposcorer.web;
 
+import com.koval.githubreposcorer.api.controller.RepositoryScoreController;
 import com.koval.githubreposcorer.api.exception.GlobalExceptionHandler;
 import com.koval.githubreposcorer.api.exception.GithubServerException;
 import com.koval.githubreposcorer.api.response.PopularRepositoriesResponse;

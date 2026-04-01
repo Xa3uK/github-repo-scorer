@@ -1,7 +1,8 @@
-package com.koval.githubreposcorer.service;
+package com.koval.githubreposcorer.unit;
 
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.result.ScoredRepository;
+import com.koval.githubreposcorer.service.RepositoryScoringService;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

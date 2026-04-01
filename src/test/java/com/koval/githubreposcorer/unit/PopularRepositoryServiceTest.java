@@ -1,8 +1,11 @@
-package com.koval.githubreposcorer.service;
+package com.koval.githubreposcorer.unit;
 
 import com.koval.githubreposcorer.api.response.PopularRepositoryResponse;
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.result.ScoredRepository;
+import com.koval.githubreposcorer.service.GithubSearchService;
+import com.koval.githubreposcorer.service.PopularRepositoryService;
+import com.koval.githubreposcorer.service.RepositoryScoringService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

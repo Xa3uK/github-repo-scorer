@@ -1,5 +1,7 @@
-package com.koval.githubreposcorer.util;
+package com.koval.githubreposcorer.unit;
 
+import com.koval.githubreposcorer.util.PercentileUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -10,7 +12,7 @@ class PercentileUtilsTest {
 
     @Test
     void emptyList_returnsOne() {
-        assertEquals(1.0, PercentileUtils.percentile95(List.of()));
+        Assertions.assertEquals(1.0, PercentileUtils.percentile95(List.of()));
     }
 
     @Test

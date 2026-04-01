@@ -1,5 +1,7 @@
-package com.koval.githubreposcorer.util;
+package com.koval.githubreposcorer.unit;
 
+import com.koval.githubreposcorer.util.RecencyUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -11,7 +13,7 @@ class RecencyUtilsTest {
 
     @Test
     void null_returnsZero() {
-        assertEquals(0.0, RecencyUtils.recencyScore(null));
+        Assertions.assertEquals(0.0, RecencyUtils.recencyScore(null));
     }
 
     @Test

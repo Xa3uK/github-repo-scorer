@@ -1,4 +1,4 @@
-package com.koval.githubreposcorer.cache;
+package com.koval.githubreposcorer.integration;
 
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.service.GithubSearchService;
