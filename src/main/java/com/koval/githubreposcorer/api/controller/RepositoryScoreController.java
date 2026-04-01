@@ -18,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/repositories")
+@RequestMapping("/api/v1/repositories")
 @Validated
 public class RepositoryScoreController {
 

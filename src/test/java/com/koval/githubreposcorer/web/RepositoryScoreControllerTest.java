@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class RepositoryScoreControllerTest {
 
-    private static final String URL = "/api/repositories/popular";
+    private static final String URL = "/api/v1/repositories/popular";
 
     private MockMvc mockMvc;
     private PopularRepositoryService service;
