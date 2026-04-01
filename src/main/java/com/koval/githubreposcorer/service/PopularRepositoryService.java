@@ -4,6 +4,7 @@ import com.koval.githubreposcorer.api.response.PopularRepositoriesResponse;
 import com.koval.githubreposcorer.api.response.PopularRepositoryResponse;
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.result.ScoredRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class PopularRepositoryService {
 
@@ -26,6 +28,7 @@ public class PopularRepositoryService {
 
     @Cacheable(value = "popularRepositories", key = "#language + ':' + #createdAfter")
     public PopularRepositoriesResponse getPopularRepos(String language, LocalDate createdAfter) {
+        log.info("Cache MISS [language={}, createdAfter={}] — fetching from GitHub", language, createdAfter);
         List<RepositoryItemResponse> mostStarred = githubSearchService.fetchTopStarred(language, createdAfter);
         List<RepositoryItemResponse> mostForked  = githubSearchService.fetchTopForked(language, createdAfter);
 
