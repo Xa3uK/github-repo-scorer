@@ -6,6 +6,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -17,6 +18,20 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setDetail(e.getMessage());
         return ResponseEntity.badRequest().body(pd);
+    }
+
+    @ExceptionHandler(GithubServerException.class)
+    public ResponseEntity<ProblemDetail> handleGithubServerError(GithubServerException e) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_GATEWAY);
+        pd.setDetail("GitHub API error after retries: " + e.getStatusCode());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(pd);
+    }
+
+    @ExceptionHandler(ResourceAccessException.class)
+    public ResponseEntity<ProblemDetail> handleTimeout(ResourceAccessException e) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE);
+        pd.setDetail("GitHub API unreachable after retries.");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(pd);
     }
 
     @ExceptionHandler(RestClientResponseException.class)

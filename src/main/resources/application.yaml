@@ -11,3 +11,5 @@ spring:
 github:
   api:
     token: ${GITHUB_API_TOKEN:}
+    connect-timeout: 3s
+    read-timeout: 10s
