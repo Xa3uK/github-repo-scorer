@@ -148,7 +148,6 @@ src/main/java/com/koval/githubreposcorer/
 │   └── response/       # Response DTOs
 ├── client/             # GitHub HTTP client with retry
 ├── config/
-│   └── properties/     # Typed configuration properties
 ├── model/
 │   ├── github/         # GitHub API response models
 │   └── result/         # Scored result models
