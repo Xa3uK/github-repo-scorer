@@ -2,12 +2,12 @@ package com.koval.githubreposcorer.util;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class RecencyUtils {
 
-    private RecencyUtils() {}
-
-    public static double recencyScore(Instant pushedAt) {
+    public double recencyScore(Instant pushedAt) {
         if (pushedAt == null) {
             return 0.0;
         }

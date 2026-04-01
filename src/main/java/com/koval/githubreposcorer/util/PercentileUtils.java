@@ -3,12 +3,12 @@ package com.koval.githubreposcorer.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class PercentileUtils {
 
-    private PercentileUtils() {}
-
-    public static double percentile95(List<Integer> values) {
+    public double percentile95(List<Integer> values) {
         if (values.isEmpty()) {
             return 1.0;
         }
