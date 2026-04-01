@@ -47,7 +47,7 @@ To run the app locally without Docker (Redis must be running separately):
 ### Get popular repositories
 
 ```
-GET /api/repositories/popular
+GET /api/v1/repositories/popular
 ```
 
 | Parameter | Type | Required | Description |
@@ -58,7 +58,7 @@ GET /api/repositories/popular
 **Example request**
 
 ```bash
-curl "http://localhost:8080/api/repositories/popular?language=Java&createdAfter=2026-01-31"
+curl "http://localhost:8080/api/v1/repositories/popular?language=Java&createdAfter=2026-01-31"
 ```
 
 **Example response**
