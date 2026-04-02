@@ -35,7 +35,7 @@ public class RepositoryScoreController {
         @NotBlank
         @Pattern(
             regexp = "^[A-Za-z][A-Za-z0-9#+.\\-\\s]{0,49}$",
-            message = "Language must start with a letter and be at most 50 characters"
+            message = "Language must start with a letter; only letters, digits, #, +, ., -, and spaces are allowed (max 50 characters)"
         )
         String language,
         @RequestParam
