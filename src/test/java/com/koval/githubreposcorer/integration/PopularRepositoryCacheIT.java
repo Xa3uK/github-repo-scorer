@@ -55,7 +55,7 @@ class PopularRepositoryCacheIT {
     @Test
     void firstCall_hitsService_secondCall_returnsFromCache() {
         var language = "Java";
-        var createdAfter = LocalDate.of(2024, 1, 1);
+        var createdAfter = LocalDate.now().minusMonths(6);
         var repo = repo(1L, "owner/repo", 1000, 200);
 
         when(githubSearchService.fetchTopStarred(language, createdAfter)).thenReturn(List.of(repo));

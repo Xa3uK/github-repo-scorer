@@ -1,5 +1,6 @@
 package com.koval.githubreposcorer.api.exception;
 
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -29,8 +30,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ProblemDetail> handleValidation(ConstraintViolationException e) {
+        String detail = e.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining("; "));
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        pd.setDetail(e.getMessage());
+        pd.setDetail(detail);
         return ResponseEntity.badRequest().body(pd);
     }
 
