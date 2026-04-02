@@ -52,8 +52,8 @@ GET /api/v1/repositories/popular
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `language` | string | yes | Programming language |
-| `createdAfter` | `YYYY-MM-DD` | yes | Minimum repository creation date |
+| `language` | string | yes | Must start with a letter; letters, digits, `#`, `+`, `.`, `-`, spaces allowed; max 50 characters |
+| `createdAfter` | `YYYY-MM-DD` | yes | Minimum repository creation date; must be within the last year, not in the future |
 
 **Example request**
 
@@ -84,6 +84,8 @@ curl "http://localhost:8080/api/v1/repositories/popular?language=Java&createdAft
 | Condition | Status |
 |---|---|
 | Missing or invalid parameter | 400 |
+| `language` fails format validation | 400 |
+| `createdAfter` is in the future or older than 1 year | 400 |
 | GitHub rate limit hit | 429 |
 | GitHub server error | 502 |
 | GitHub unreachable | 503 |
