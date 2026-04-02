@@ -20,7 +20,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class PopularRepositoryServiceTest {
@@ -34,13 +36,13 @@ class PopularRepositoryServiceTest {
     @InjectMocks
     private PopularRepositoryService service;
 
-    private static final LocalDate DATE = LocalDate.of(2024, 1, 1);
+    private static final LocalDate DATE = LocalDate.now().minusMonths(6);
     private static final String LANG = "Java";
 
     @BeforeEach
     void stubScoring() {
         // Pass repos through as ScoredRepository so merge/dedup results are observable
-        when(scoringService.score(anyList())).thenAnswer(inv -> {
+        lenient().when(scoringService.score(anyList())).thenAnswer(inv -> {
             List<RepositoryItemResponse> repos = inv.getArgument(0);
             return repos.stream().map(r -> new ScoredRepository(r, 0.5)).toList();
         });
@@ -125,6 +127,25 @@ class PopularRepositoryServiceTest {
         var ids = result.items().stream().map(PopularRepositoryResponse::id).toList();
         assertEquals(3, ids.size());
         assertEquals(3, ids.stream().distinct().count());
+    }
+
+    // --- createdAfter validation ---
+
+    @Test
+    void createdAfterOlderThanOneYear_throwsIllegalArgument() {
+        LocalDate tooOld = LocalDate.now().minusYears(1).minusDays(1);
+        var ex = assertThrows(IllegalArgumentException.class,
+                () -> service.getPopularRepos(LANG, tooOld));
+        assertTrue(ex.getMessage().contains("1 year"));
+    }
+
+    @Test
+    void createdAfterExactlyOneYearAgo_isAllowed() {
+        LocalDate boundary = LocalDate.now().minusYears(1);
+        when(githubSearchService.fetchTopStarred(LANG, boundary)).thenReturn(List.of());
+        when(githubSearchService.fetchTopForked(LANG, boundary)).thenReturn(List.of());
+
+        assertDoesNotThrow(() -> service.getPopularRepos(LANG, boundary));
     }
 
     private static RepositoryItemResponse repo(long id, String name, int stars, int forks) {

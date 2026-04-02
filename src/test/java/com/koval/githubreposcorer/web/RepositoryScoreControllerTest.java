@@ -1,17 +1,19 @@
 package com.koval.githubreposcorer.web;
 
-import com.koval.githubreposcorer.api.controller.RepositoryScoreController;
-import com.koval.githubreposcorer.api.exception.GlobalExceptionHandler;
 import com.koval.githubreposcorer.api.exception.GithubServerException;
 import com.koval.githubreposcorer.api.response.PopularRepositoriesResponse;
 import com.koval.githubreposcorer.api.response.PopularRepositoryResponse;
 import com.koval.githubreposcorer.service.PopularRepositoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,25 +22,28 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+                properties = "spring.cache.type=simple")
 class RepositoryScoreControllerTest {
 
     private static final String URL = "/api/v1/repositories/popular";
+    private static final String RECENT_DATE = LocalDate.now().minusMonths(6).toString();
+
+    @Autowired
+    private WebApplicationContext context;
+
+    @MockitoBean
+    private PopularRepositoryService service;
 
     private MockMvc mockMvc;
-    private PopularRepositoryService service;
 
     @BeforeEach
     void setUp() {
-        service = mock(PopularRepositoryService.class);
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(new RepositoryScoreController(service))
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
     // --- happy path ---
@@ -48,8 +53,8 @@ class RepositoryScoreControllerTest {
         var item = new PopularRepositoryResponse(
                 1L, "owner/repo", "https://github.com/owner/repo", "Java",
                 1000, 200,
-                Instant.parse("2024-01-01T00:00:00Z"),
-                Instant.parse("2024-06-01T00:00:00Z"),
+                Instant.parse("2025-01-01T00:00:00Z"),
+                Instant.parse("2025-06-01T00:00:00Z"),
                 0.9125);
 
         when(service.getPopularRepos(eq("Java"), any(LocalDate.class)))
@@ -57,7 +62,7 @@ class RepositoryScoreControllerTest {
 
         mockMvc.perform(get(URL)
                         .param("language", "Java")
-                        .param("createdAfter", "2024-01-01"))
+                        .param("createdAfter", RECENT_DATE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].fullName").value("owner/repo"))
@@ -71,24 +76,81 @@ class RepositoryScoreControllerTest {
 
         mockMvc.perform(get(URL)
                         .param("language", "Kotlin")
-                        .param("createdAfter", "2024-01-01"))
+                        .param("createdAfter", RECENT_DATE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
     }
 
-    // --- validation (400) ---
+    @Test
+    void languageWithSpecialChars_returns200() throws Exception {
+        when(service.getPopularRepos(eq("C++"), any(LocalDate.class)))
+                .thenReturn(new PopularRepositoriesResponse(List.of()));
+
+        mockMvc.perform(get(URL)
+                        .param("language", "C++")
+                        .param("createdAfter", RECENT_DATE))
+                .andExpect(status().isOk());
+    }
+
+    // --- language validation (400) ---
 
     @Test
     void missingLanguage_returns400() throws Exception {
-        mockMvc.perform(get(URL).param("createdAfter", "2024-01-01"))
+        mockMvc.perform(get(URL).param("createdAfter", RECENT_DATE))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void blankLanguage_returns400() throws Exception {
+        mockMvc.perform(get(URL)
+                        .param("language", "   ")
+                        .param("createdAfter", RECENT_DATE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void languageStartingWithDigit_returns400() throws Exception {
+        mockMvc.perform(get(URL)
+                        .param("language", "1Java")
+                        .param("createdAfter", RECENT_DATE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void languageWithInjectionChars_returns400() throws Exception {
+        mockMvc.perform(get(URL)
+                        .param("language", "Java&sort=hacked")
+                        .param("createdAfter", RECENT_DATE))
+                .andExpect(status().isBadRequest());
+    }
+
+    // --- createdAfter validation (400) ---
 
     @Test
     void missingCreatedAfter_returns400() throws Exception {
         mockMvc.perform(get(URL).param("language", "Java"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void futureCreatedAfter_returns400() throws Exception {
+        mockMvc.perform(get(URL)
+                        .param("language", "Java")
+                        .param("createdAfter", "2030-01-01"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void serviceThrowsIllegalArgument_returns400() throws Exception {
+        when(service.getPopularRepos(any(), any()))
+                .thenThrow(new IllegalArgumentException("createdAfter must not be older than 1 year"));
+
+        mockMvc.perform(get(URL)
+                        .param("language", "Java")
+                        .param("createdAfter", RECENT_DATE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(containsString("1 year")));
     }
 
     // --- error handling ---
@@ -101,7 +163,7 @@ class RepositoryScoreControllerTest {
 
         mockMvc.perform(get(URL)
                         .param("language", "Java")
-                        .param("createdAfter", "2024-01-01"))
+                        .param("createdAfter", RECENT_DATE))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.detail").value(containsString("rate limit")));
     }
@@ -113,7 +175,7 @@ class RepositoryScoreControllerTest {
 
         mockMvc.perform(get(URL)
                         .param("language", "Java")
-                        .param("createdAfter", "2024-01-01"))
+                        .param("createdAfter", RECENT_DATE))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.detail").value(containsString("GitHub API error after retries")));
     }
@@ -125,7 +187,7 @@ class RepositoryScoreControllerTest {
 
         mockMvc.perform(get(URL)
                         .param("language", "Java")
-                        .param("createdAfter", "2024-01-01"))
+                        .param("createdAfter", RECENT_DATE))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.detail").value("GitHub API unreachable after retries."));
     }
