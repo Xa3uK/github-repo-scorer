@@ -26,8 +26,15 @@ public class PopularRepositoryService {
         this.scoringService = scoringService;
     }
 
+    private static final long MAX_YEARS_BACK = 1;
+
     @Cacheable(value = "popularRepositories", key = "#language + ':' + #createdAfter")
     public PopularRepositoriesResponse getPopularRepos(String language, LocalDate createdAfter) {
+        LocalDate earliestAllowed = LocalDate.now().minusYears(MAX_YEARS_BACK);
+        if (createdAfter.isBefore(earliestAllowed)) {
+            throw new IllegalArgumentException(
+                "createdAfter must not be older than 1 year. Earliest allowed: %s".formatted(earliestAllowed));
+        }
         log.info("Cache MISS [language={}, createdAfter={}] — fetching from GitHub", language, createdAfter);
         List<RepositoryItemResponse> mostStarred = githubSearchService.fetchTopStarred(language, createdAfter);
         List<RepositoryItemResponse> mostForked  = githubSearchService.fetchTopForked(language, createdAfter);

@@ -5,6 +5,7 @@ import com.koval.githubreposcorer.service.PopularRepositoryService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
@@ -32,13 +33,18 @@ public class RepositoryScoreController {
     public List<PopularRepositoryResponse> getPopularRepos(
         @RequestParam
         @NotBlank
+        @Pattern(
+            regexp = "^[A-Za-z][A-Za-z0-9#+.\\-\\s]{0,49}$",
+            message = "Language must start with a letter and be at most 50 characters"
+        )
         String language,
         @RequestParam
         @NotNull
         @PastOrPresent
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAfter
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate createdAfter
     ) {
-        log.info("Incoming request: language={}, createdAfter={}", language, createdAfter);
-        return popularRepositoryService.getPopularRepos(language, createdAfter).items();
+        log.info("Incoming request: language={}, createdAfter={}", language.trim(), createdAfter);
+        return popularRepositoryService.getPopularRepos(language.trim(), createdAfter).items();
     }
 }

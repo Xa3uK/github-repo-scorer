@@ -3,11 +3,13 @@ package com.koval.githubreposcorer.service;
 import com.koval.githubreposcorer.client.GithubClient;
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.github.TopRepositoriesResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 public class GithubSearchService {
 
@@ -30,7 +32,11 @@ public class GithubSearchService {
         TopRepositoriesResponse response = githubClient.searchRepositories(query, sort);
 
         if (response == null || response.items() == null) {
+            log.warn("GitHub returned null response [sort={}, language={}, createdAfter={}]", sort, language, createdAfter);
             return List.of();
+        }
+        if (response.items().isEmpty()) {
+            log.warn("GitHub returned empty result set [sort={}, language={}, createdAfter={}]", sort, language, createdAfter);
         }
 
         return response.items();
