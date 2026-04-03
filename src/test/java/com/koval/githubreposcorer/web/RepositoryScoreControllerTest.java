@@ -3,9 +3,12 @@ package com.koval.githubreposcorer.web;
 import com.koval.githubreposcorer.api.exception.GithubServerException;
 import com.koval.githubreposcorer.api.response.PopularRepositoriesResponse;
 import com.koval.githubreposcorer.api.response.PopularRepositoryResponse;
+import com.koval.githubreposcorer.model.domain.SupportedLanguage;
 import com.koval.githubreposcorer.service.PopularRepositoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -44,6 +47,20 @@ class RepositoryScoreControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    }
+
+    // --- supported languages ---
+
+    @ParameterizedTest
+    @EnumSource(SupportedLanguage.class)
+    void allSupportedLanguages_return200(SupportedLanguage language) throws Exception {
+        when(service.getPopularRepos(eq(language.getGithubName()), any()))
+                .thenReturn(new PopularRepositoriesResponse(List.of()));
+
+        mockMvc.perform(get(URL)
+                        .param("language", language.getGithubName())
+                        .param("createdAfter", RECENT_DATE))
+                .andExpect(status().isOk());
     }
 
     // --- happy path ---
@@ -105,22 +122,6 @@ class RepositoryScoreControllerTest {
     void blankLanguage_returns400() throws Exception {
         mockMvc.perform(get(URL)
                         .param("language", "   ")
-                        .param("createdAfter", RECENT_DATE))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void languageStartingWithDigit_returns400() throws Exception {
-        mockMvc.perform(get(URL)
-                        .param("language", "1Java")
-                        .param("createdAfter", RECENT_DATE))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void languageWithInjectionChars_returns400() throws Exception {
-        mockMvc.perform(get(URL)
-                        .param("language", "Java&sort=hacked")
                         .param("createdAfter", RECENT_DATE))
                 .andExpect(status().isBadRequest());
     }

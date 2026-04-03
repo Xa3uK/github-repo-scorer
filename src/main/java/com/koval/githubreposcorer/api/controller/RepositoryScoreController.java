@@ -5,7 +5,6 @@ import com.koval.githubreposcorer.service.PopularRepositoryService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
@@ -32,11 +31,7 @@ public class RepositoryScoreController {
     @GetMapping("/popular")
     public List<PopularRepositoryResponse> getPopularRepos(
         @RequestParam
-        @NotBlank
-        @Pattern(
-            regexp = "^[A-Za-z][A-Za-z0-9#+.\\-\\s]{0,49}$",
-            message = "Language must start with a letter; only letters, digits, #, +, ., -, and spaces are allowed (max 50 characters)"
-        )
+        @NotBlank(message = "language must not be blank")
         String language,
         @RequestParam
         @NotNull

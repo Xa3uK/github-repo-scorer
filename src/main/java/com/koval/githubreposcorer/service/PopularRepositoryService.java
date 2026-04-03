@@ -2,6 +2,7 @@ package com.koval.githubreposcorer.service;
 
 import com.koval.githubreposcorer.api.response.PopularRepositoriesResponse;
 import com.koval.githubreposcorer.api.response.PopularRepositoryResponse;
+import com.koval.githubreposcorer.model.domain.SupportedLanguage;
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.result.ScoredRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -28,16 +29,21 @@ public class PopularRepositoryService {
 
     private static final long MAX_YEARS_BACK = 1;
 
-    @Cacheable(value = "popularRepositories", key = "#language + ':' + #createdAfter")
+    @Cacheable(value = "popularRepositories", key = "#language.trim().toLowerCase() + ':' + #createdAfter")
     public PopularRepositoriesResponse getPopularRepos(String language, LocalDate createdAfter) {
         LocalDate earliestAllowed = LocalDate.now().minusYears(MAX_YEARS_BACK);
         if (createdAfter.isBefore(earliestAllowed)) {
             throw new IllegalArgumentException(
                 "createdAfter must not be older than 1 year. Earliest allowed: %s".formatted(earliestAllowed));
         }
-        log.info("Cache MISS [language={}, createdAfter={}] — fetching from GitHub", language, createdAfter);
-        List<RepositoryItemResponse> mostStarred = githubSearchService.fetchTopStarred(language, createdAfter);
-        List<RepositoryItemResponse> mostForked  = githubSearchService.fetchTopForked(language, createdAfter);
+        SupportedLanguage lang = SupportedLanguage.fromString(language).orElseThrow(() ->
+            new IllegalArgumentException(
+                "Language '%s' is not supported yet by our search engine. Supported languages: %s"
+                    .formatted(language, SupportedLanguage.validValues())));
+
+        log.info("Cache MISS [language={}, createdAfter={}] — fetching from GitHub", lang.getGithubName(), createdAfter);
+        List<RepositoryItemResponse> mostStarred = githubSearchService.fetchTopStarred(lang.getGithubName(), createdAfter);
+        List<RepositoryItemResponse> mostForked  = githubSearchService.fetchTopForked(lang.getGithubName(), createdAfter);
 
         Map<Long, RepositoryItemResponse> merged = new LinkedHashMap<>();
         mostStarred.forEach(r -> merged.put(r.id(), r));

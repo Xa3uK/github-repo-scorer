@@ -1,6 +1,7 @@
 package com.koval.githubreposcorer.unit;
 
 import com.koval.githubreposcorer.api.response.PopularRepositoryResponse;
+import com.koval.githubreposcorer.model.domain.SupportedLanguage;
 import com.koval.githubreposcorer.model.github.RepositoryItemResponse;
 import com.koval.githubreposcorer.model.result.ScoredRepository;
 import com.koval.githubreposcorer.service.GithubSearchService;
@@ -9,6 +10,8 @@ import com.koval.githubreposcorer.service.RepositoryScoringService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -127,6 +130,33 @@ class PopularRepositoryServiceTest {
         var ids = result.items().stream().map(PopularRepositoryResponse::id).toList();
         assertEquals(3, ids.size());
         assertEquals(3, ids.stream().distinct().count());
+    }
+
+    // --- language validation ---
+
+    @ParameterizedTest
+    @EnumSource(SupportedLanguage.class)
+    void allSupportedLanguages_areAcceptedByService(SupportedLanguage language) {
+        when(githubSearchService.fetchTopStarred(language.getGithubName(), DATE)).thenReturn(List.of());
+        when(githubSearchService.fetchTopForked(language.getGithubName(), DATE)).thenReturn(List.of());
+
+        assertDoesNotThrow(() -> service.getPopularRepos(language.getGithubName(), DATE));
+    }
+
+    @Test
+    void unsupportedLanguage_throwsIllegalArgument() {
+        var ex = assertThrows(IllegalArgumentException.class,
+                () -> service.getPopularRepos("SomeOtherLanguage", DATE));
+        assertTrue(ex.getMessage().contains("not supported"));
+        assertTrue(ex.getMessage().contains("Supported languages:"));
+    }
+
+    @Test
+    void languageLookupIsCaseInsensitive() {
+        when(githubSearchService.fetchTopStarred("Java", DATE)).thenReturn(List.of());
+        when(githubSearchService.fetchTopForked("Java", DATE)).thenReturn(List.of());
+
+        assertDoesNotThrow(() -> service.getPopularRepos("java", DATE));
     }
 
     // --- createdAfter validation ---
