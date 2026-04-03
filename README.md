@@ -52,8 +52,14 @@ GET /api/v1/repositories/popular
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `language` | string | yes | Must start with a letter; letters, digits, `#`, `+`, `.`, `-`, spaces allowed; max 50 characters |
+| `language` | string | yes | Must be one of the supported languages listed below |
 | `createdAfter` | `YYYY-MM-DD` | yes | Minimum repository creation date; must be within the last year, not in the future |
+
+**Supported languages (MVP)**
+
+TypeScript, Python, JavaScript, Java, C#, Go, PHP, Shell, Kotlin, Swift, Rust, Ruby, Dart, Scala, R, Objective-C, Groovy, PowerShell, Haskell, Elixir
+
+Language matching is case-insensitive (`java`, `Java`, and `JAVA` are all accepted).
 
 **Example request**
 
@@ -83,8 +89,9 @@ curl "http://localhost:8080/api/v1/repositories/popular?language=Java&createdAft
 
 | Condition | Status |
 |---|---|
-| Missing or invalid parameter | 400 |
-| `language` fails format validation | 400 |
+| Missing required parameter | 400 |
+| `language` is blank | 400 |
+| `language` is not in the supported list | 400 |
 | `createdAfter` is in the future or older than 1 year | 400 |
 | GitHub rate limit hit | 429 |
 | GitHub server error | 502 |
